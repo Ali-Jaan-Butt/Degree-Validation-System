@@ -112,7 +112,7 @@
     <div class="container">
         <div class="verification-section">
             <h1>File Verification</h1>
-            <form method="post" enctype="multipart/form-data" action="{% url 'handle_click' %}">
+            <form method="post" enctype="multipart/form-data" action="{% url 'verify' %}">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="file">Choose File:</label>

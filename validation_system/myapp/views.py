@@ -16,7 +16,6 @@ def myapp(request):
         gazet_processing()
     else:
         pass
-    upload_file(request)
     return render(request, 'myapp/myapp.html')
 
 def upload_file(request):
@@ -29,7 +28,6 @@ def handle_uploaded_file(uploaded_file):
     with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
-    varify()
             
 def gazet_processing():
     pdf_path = 'myapp/gazet/Gz_Ia1p21.pdf'
@@ -65,9 +63,11 @@ def gazet_processing():
     df.to_csv('myapp/gazet/gazet.csv', index=False)
     pass
 
-def varify(request, uploaded_file):
-    pdf_file = 'myapp/degrees/' + uploaded_file.name + '.pdf'
-    # file_name = re.search('degrees/(.*?).pdf', pdf_file).group(1)
+def verify(request):
+    upload_file(request)
+    if request.method == 'POST' and request.FILES['file']:
+        uploaded_file = request.FILES['file']
+    pdf_file = 'myapp/degrees/' + uploaded_file.name
     file_name = uploaded_file.name
     images = convert_from_path(pdf_file, dpi=300)
     for i, image in enumerate(images):
@@ -77,11 +77,15 @@ def varify(request, uploaded_file):
     extracted_text = pytesseract.image_to_string(image)
     name = re.search('Name: (.*?) F', extracted_text).group(1)
     roll = re.search('Roll No.: (.*?) ', extracted_text).group(1)
+    result = re.search('Notification: (.*?)\n', extracted_text).group(1)
     print(name)
     print(roll)
+    print(result)
+    data = name + '\n' + roll + '\n' + result
+    return HttpResponse(data, content_type='text/plain')
     
-def handle_click(request):
-    if request.method == 'POST':
-        handle_uploaded_file(uploaded_file)
-    else:
-        print('Method not allowed.')
+# def handle_click(request):
+#     if request.method == 'POST':
+#         varify()
+#     else:
+#         print('Method not allowed.')
