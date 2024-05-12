@@ -78,6 +78,20 @@ def verify(request):
     name = re.search('Name: (.*?) F', extracted_text).group(1)
     roll = re.search('Roll No.: (.*?) ', extracted_text).group(1)
     result = re.search('Notification: (.*?)\n', extracted_text).group(1)
+    df = pd.read_csv('myapp/gazet/gazet.csv')
+    if any(df['Roll']==roll)==True:
+        comp = df[df['Roll']==roll]
+        ver = (comp['Result']==result).iloc[0]
+        if ver==True:
+            with open('myapp/verified/' + uploaded_file.name, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+        else:
+            with open('myapp/unverified/' + uploaded_file.name, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+    else:
+        return HttpResponse('Roll no not found')
     print(name)
     print(roll)
     print(result)
