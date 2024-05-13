@@ -25,6 +25,7 @@ urlpatterns = [
     path('', views.myapp, name='myapp'),
     path('', views.upload_file, name='upload_file'),
     path('', views.handle_uploaded_file, name='handle_uploaded_file'),
-    # path('handle-click/', views.handle_click, name='handle_click')
-    path('verify/', views.verify, name='verify')
+    path('verify/', views.verify, name='verify'),
+    path('', views.varified_db, name='varified_db'),
+    path('', views.unvarified_db, name='unvarified_db'),
 ]

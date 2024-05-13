@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            position: relative; /* Set body position to relative */
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #333;
+            padding-top: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar ul li a {
+            color: #fff; /* Set text color to white */
+            text-decoration: none; /* Remove underline */
+        }
+
+        .sidebar ul li a:hover {
+            text-decoration: underline; /* Add underline on hover */
+        }
+
+        .sidebar ul li {
+            padding: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #555;
+        }
+
+        .content {
+            margin-left: 250px; /* Adjusted to accommodate sidebar */
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Style checkboxes */
+        .checkbox-container {
+            margin-top: 20px;
+        }
+
+        .checkbox-label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .custom-checkbox {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #333;
+            cursor: pointer;
+            position: relative;
+            margin-right: 10px; /* Add margin between checkbox and label */
+        }
+
+        .custom-checkbox:checked::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: #000;
+        }
+
+        /* Adjust image container styles */
+        #imageContainer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        #imageDisplay {
+            max-width: 720px;
+            max-height: 1280px;
+            margin-bottom: 20px;
+        }
+
+        /* Style Save button */
+        .save-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .save-button:hover {
+            background-color: #0966ca;
+        }
+        #savedContentBox {
+            max-width: 600px; /* Adjust width as needed */
+            margin: 20px auto; /* Center the box horizontally */
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        #savedContentBox h2 {
+            margin-top: 0;
+        }
+
+        .saved-template {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .saved-template img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 20px;
+        }
+
+        .saved-template ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .saved-template li {
+            margin-bottom: 5px;
+        }
+
+        .saved-template button {
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="saved_templates.html">Saved Templates</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="logout.html">Logout</a></li>
+        </ul>
+    </div>
+    
+    <div class="content">
+        <h1>Admin Dashboard</h1>
+        <input type="file" id="imageInput" accept="image/*">
+        <div id="imageContainer" style="display: none;">
+            <img id="imageDisplay" src="#" alt="Uploaded Image">
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="checkbox-container">
+            <label class="checkbox-label">
+                <input type="checkbox" class="custom-checkbox">
+                Checkbox 1
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" class="custom-checkbox">
+                Checkbox 2
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" class="custom-checkbox">
+                Checkbox 3
+            </label>
+        </div>
+
+        <!-- Save button -->
+        <button class="save-button" onclick="saveTemplate()">Save Template</button>
+    </div>
+
+    <!-- Saved content box -->
+    <div id="savedContentBox">
+        <h2>Saved Content</h2>
+        <div id="savedContent"></div>
+    </div>
+
+    <script>
+        function saveTemplate() {
+    console.log("Saving template...");
+
+    // Get uploaded image
+    const uploadedImage = document.getElementById('imageDisplay').src;
+
+    // Check if image is uploaded
+    if (uploadedImage === '#') {
+        alert('Please upload an image.');
+        return;
+    }
+
+    // Get selected checkboxes
+    const checkboxes = document.querySelectorAll('.custom-checkbox:checked');
+    const selectedCheckboxes = Array.from(checkboxes).map(checkbox => checkbox.parentElement.textContent.trim());
+
+    // Check if at least one checkbox is selected
+    if (selectedCheckboxes.length === 0) {
+        alert('Please select at least one checkbox.');
+        return;
+    }
+
+    // Create new element to display saved content
+    const savedContent = document.createElement('div');
+    savedContent.classList.add('saved-template'); // Add class for styling
+    savedContent.innerHTML = `
+        <img src="${uploadedImage}" alt="Uploaded Image">
+        <ul>${selectedCheckboxes.map(checkbox => `<li>${checkbox}</li>`).join('')}</ul>
+        <button onclick="editTemplate(this)">Edit</button>
+        <button onclick="deleteTemplate(this)">Delete</button>
+    `;
+
+    // Log the HTML content of the saved content element
+    console.log("Saved content HTML:", savedContent.outerHTML);
+
+    // Append saved content to the box
+    document.getElementById('savedContent').appendChild(savedContent);
+}
+
+        function editTemplate(button) {
+            // Functionality to edit the saved template
+            // You can implement this according to your requirements
+            console.log("Edit button clicked");
+        }
+
+        function deleteTemplate(button) {
+            // Functionality to delete the saved template
+            const templateDiv = button.parentElement;
+            templateDiv.remove();
+        }
+
+        // Function to display the uploaded image
+        document.getElementById('imageInput').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('imageDisplay').src = event.target.result;
+                    document.getElementById('imageContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

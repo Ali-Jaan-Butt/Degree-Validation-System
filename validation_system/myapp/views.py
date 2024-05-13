@@ -10,6 +10,7 @@ import pytesseract
 from PyPDF2 import PdfFileReader
 from django.http import HttpResponse
 import os
+import pymongo
 
 def myapp(request):
     if os.path.exists('myapp/gazet/gazet.csv')==False:
@@ -86,17 +87,34 @@ def verify(request):
             with open('myapp/verified/' + uploaded_file.name, 'wb+') as destination:
                 for chunk in uploaded_file.chunks():
                     destination.write(chunk)
+            varified_db(name, roll, result)
         else:
             with open('myapp/unverified/' + uploaded_file.name, 'wb+') as destination:
                 for chunk in uploaded_file.chunks():
                     destination.write(chunk)
+            unvarified_db(name, roll, result)
+        return render(request, 'myapp/dashboard.html')
     else:
         return HttpResponse('Roll no not found')
-    print(name)
-    print(roll)
-    print(result)
-    data = name + '\n' + roll + '\n' + result
-    return HttpResponse(data, content_type='text/plain')
+    # print(name)
+    # print(roll)
+    # print(result)
+    # data = name + '\n' + roll + '\n' + result
+    # return HttpResponse(data, content_type='text/plain')
+
+def varified_db(name, roll, result):
+    client = pymongo.MongoClient()
+    db = client.get_database('validate')
+    collection = db.get_collection('validation_data')
+    data = {'name': name, 'roll': roll, 'result': result}
+    collection.insert_one(data)
+    
+def unvarified_db(name, roll, result):
+    client = pymongo.MongoClient()
+    db = client.get_database('validate')
+    collection = db.get_collection('unvalidated_data')
+    unver_data = {'name': name, 'roll': roll, 'result': result}
+    collection.insert_one(unver_data)
     
 # def handle_click(request):
 #     if request.method == 'POST':
