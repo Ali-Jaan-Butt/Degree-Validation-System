@@ -22,13 +22,11 @@ def myapp(request):
 def upload_file(request):
     if request.method == 'POST' and request.FILES['file']:
         uploaded_file = request.FILES['file']
-        handle_uploaded_file(uploaded_file)
-    return render(request, 'myapp/myapp.html')
-
-def handle_uploaded_file(uploaded_file):
-    with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
-        for chunk in uploaded_file.chunks():
-            destination.write(chunk)
+        print(uploaded_file.name)
+        with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+    # return uploaded_file
             
 def gazet_processing():
     pdf_path = 'myapp/gazet/Gz_Ia1p21.pdf'
@@ -65,9 +63,9 @@ def gazet_processing():
     pass
 
 def verify(request):
-    upload_file(request)
     if request.method == 'POST' and request.FILES['file']:
         uploaded_file = request.FILES['file']
+    upload_file(request)
     pdf_file = 'myapp/degrees/' + uploaded_file.name
     file_name = uploaded_file.name
     images = convert_from_path(pdf_file, dpi=300)
@@ -96,11 +94,7 @@ def verify(request):
         return render(request, 'myapp/dashboard.html')
     else:
         return HttpResponse('Roll no not found')
-    # print(name)
-    # print(roll)
-    # print(result)
-    # data = name + '\n' + roll + '\n' + result
-    # return HttpResponse(data, content_type='text/plain')
+    return render(request, 'myapp/dashboard.html')
 
 def varified_db(name, roll, result):
     client = pymongo.MongoClient()
@@ -116,8 +110,12 @@ def unvarified_db(name, roll, result):
     unver_data = {'name': name, 'roll': roll, 'result': result}
     collection.insert_one(unver_data)
     
-# def handle_click(request):
-#     if request.method == 'POST':
-#         varify()
-#     else:
-#         print('Method not allowed.')
+def your_view_name(request):
+    if request.method == 'POST':
+        checkbox_value = request.POST.get('my_checkbox')
+        if checkbox_value == '1':
+            print('Checked')
+        else:
+            print('Unchecked')
+
+    # return render(request, 'myapp/dashboard.html')

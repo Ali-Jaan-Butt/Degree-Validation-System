@@ -24,8 +24,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('', views.myapp, name='myapp'),
     path('', views.upload_file, name='upload_file'),
-    path('', views.handle_uploaded_file, name='handle_uploaded_file'),
     path('verify/', views.verify, name='verify'),
     path('', views.varified_db, name='varified_db'),
     path('', views.unvarified_db, name='unvarified_db'),
+    path('', views.your_view_name, name='your_view_name'),
 ]
