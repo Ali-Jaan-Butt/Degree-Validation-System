@@ -11,6 +11,9 @@ from PyPDF2 import PdfFileReader
 from django.http import HttpResponse
 import os
 import pymongo
+import logging
+
+# logger = logging.getLogger(__name__)
 
 def myapp(request):
     if os.path.exists('myapp/gazet/gazet.csv')==False:
@@ -19,14 +22,24 @@ def myapp(request):
         pass
     return render(request, 'myapp/myapp.html')
 
-def upload_file(request):
-    if request.method == 'POST' and request.FILES['file']:
-        uploaded_file = request.FILES['file']
-        print(uploaded_file.name)
-        with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
-            for chunk in uploaded_file.chunks():
-                destination.write(chunk)
-    # return uploaded_file
+# a = 0
+
+# def upload_file(request):
+#     # a+=1
+#     print('Ali')
+#     uploaded_file = None
+#     if request.method == 'POST' and request.FILES['file']:
+#         uploaded_file = request.FILES['file']
+#     if uploaded_file is not None:
+#             # my_file = uploaded_file.name
+#             # print(my_file)
+#             with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
+#                 for chunk in uploaded_file.chunks():
+#                     destination.write(chunk)
+#             # global uploaded_file
+#     else:
+#         pass
+#     return uploaded_file
             
 def gazet_processing():
     pdf_path = 'myapp/gazet/Gz_Ia1p21.pdf'
@@ -62,39 +75,8 @@ def gazet_processing():
     df.to_csv('myapp/gazet/gazet.csv', index=False)
     pass
 
-def verify(request):
-    if request.method == 'POST' and request.FILES['file']:
-        uploaded_file = request.FILES['file']
-    upload_file(request)
-    pdf_file = 'myapp/degrees/' + uploaded_file.name
-    file_name = uploaded_file.name
-    images = convert_from_path(pdf_file, dpi=300)
-    for i, image in enumerate(images):
-        image.save('myapp/image/' + file_name + '.jpg', 'JPEG')
-    image_file = 'myapp/image/' + file_name + '.jpg'
-    image = Image.open(image_file)
-    extracted_text = pytesseract.image_to_string(image)
-    name = re.search('Name: (.*?) F', extracted_text).group(1)
-    roll = re.search('Roll No.: (.*?) ', extracted_text).group(1)
-    result = re.search('Notification: (.*?)\n', extracted_text).group(1)
-    df = pd.read_csv('myapp/gazet/gazet.csv')
-    if any(df['Roll']==roll)==True:
-        comp = df[df['Roll']==roll]
-        ver = (comp['Result']==result).iloc[0]
-        if ver==True:
-            with open('myapp/verified/' + uploaded_file.name, 'wb+') as destination:
-                for chunk in uploaded_file.chunks():
-                    destination.write(chunk)
-            varified_db(name, roll, result)
-        else:
-            with open('myapp/unverified/' + uploaded_file.name, 'wb+') as destination:
-                for chunk in uploaded_file.chunks():
-                    destination.write(chunk)
-            unvarified_db(name, roll, result)
-        return render(request, 'myapp/dashboard.html')
-    else:
-        return HttpResponse('Roll no not found')
-    return render(request, 'myapp/dashboard.html')
+# def get_request(request):
+#     return render(request, 'myapp/dashboard.html')
 
 def varified_db(name, roll, result):
     client = pymongo.MongoClient()
@@ -109,6 +91,63 @@ def unvarified_db(name, roll, result):
     collection = db.get_collection('unvalidated_data')
     unver_data = {'name': name, 'roll': roll, 'result': result}
     collection.insert_one(unver_data)
+
+def verify(request):
+    # if request.method == 'POST' and request.FILES['file']:
+    #     uploaded_file = request.FILES['file']
+    # logger.info("Verify function called")
+    global uploaded_file
+    print('Ali')
+    uploaded_file = None
+    if request.method == 'POST' and request.FILES['file']:
+        uploaded_file = request.FILES['file']
+        if uploaded_file is not None:
+            # my_file = uploaded_file.name
+            # print(my_file)
+            with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+            # global uploaded_file
+        # else:
+        #     pass
+        # uploaded_file = None
+        # uploaded_file = upload_file(request)
+        # if uploaded_file is not None:
+            # uploaded_file = upload_file(request)
+            print(uploaded_file)
+            # get_request(request)
+            pdf_file = 'myapp/degrees/' + uploaded_file.name
+            file_name = uploaded_file.name
+            images = convert_from_path(pdf_file, dpi=300)
+            for i, image in enumerate(images):
+                image.save('myapp/image/' + file_name + '.jpg', 'JPEG')
+            image_file = 'myapp/image/' + file_name + '.jpg'
+            image = Image.open(image_file)
+            extracted_text = pytesseract.image_to_string(image)
+            name = re.search('Name: (.*?) F', extracted_text).group(1)
+            roll = re.search('Roll No.: (.*?) ', extracted_text).group(1)
+            result = re.search('Notification: (.*?)\n', extracted_text).group(1)
+            df = pd.read_csv('myapp/gazet/gazet.csv')
+            if any(df['Roll']==roll)==True:
+                comp = df[df['Roll']==roll]
+                ver = (comp['Result']==result).iloc[0]
+                if ver==True:
+                    with open('myapp/verified/' + uploaded_file.name, 'wb+') as destination:
+                        for chunk in uploaded_file.chunks():
+                            destination.write(chunk)
+                    varified_db(name, roll, result)
+                else:
+                    with open('myapp/unverified/' + uploaded_file.name, 'wb+') as destination:
+                        for chunk in uploaded_file.chunks():
+                            destination.write(chunk)
+                    unvarified_db(name, roll, result)
+                # return HttpResponse('Data Uploaded')
+                return render(request, 'myapp/dashboard.html')
+            else:
+                return HttpResponse('Roll no not found')
+            # return render(request, 'myapp/dashboard.html')
+    else:
+        return HttpResponse('File not found')
     
 def your_view_name(request):
     if request.method == 'POST':

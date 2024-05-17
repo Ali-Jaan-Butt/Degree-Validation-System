@@ -16,16 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.urls import path
 from myapp import views
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.myapp, name='myapp'),
-    path('', views.upload_file, name='upload_file'),
-    path('verify/', views.verify, name='verify'),
+    # path('', views.upload_file, name='upload_file'),
+    path('dashboard/', views.verify, name='verify'),
     path('', views.varified_db, name='varified_db'),
     path('', views.unvarified_db, name='unvarified_db'),
     path('', views.your_view_name, name='your_view_name'),
+    # path('', views.get_request, name='get_request'),
 ]
