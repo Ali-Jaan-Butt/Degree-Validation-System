@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Templates</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            position: relative; /* Set body position to relative */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #333;
+            padding-top: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar ul li a {
+            color: #fff; /* Set text color to white */
+            text-decoration: none; /* Remove underline */
+        }
+
+        .sidebar ul li a:hover {
+            text-decoration: underline; /* Add underline on hover */
+        }
+
+        .sidebar ul li {
+            padding: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #555;
+        }
+
+        .content {
+            margin-left: 250px; /* Adjusted to accommodate sidebar */
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .template {
+            width: 200px;
+            height: 200px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            margin-right: 20px;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .template img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .template-options {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .template-options button {
+            margin-left: 5px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .template-options button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'saved_template' %}">Saved Templates</a></li>
+            <li><a href="{% url 'report' %}">Reports</a></li>
+            <li><a href="{% url 'login' %}">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="content" id="savedTemplates">
+        <!-- Saved Templates will be dynamically added here -->
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Function to load saved templates from local storage
+            function loadSavedTemplates() {
+                var savedTemplates = JSON.parse(localStorage.getItem('savedTemplates'));
+                if (savedTemplates) {
+                    var savedTemplatesContainer = document.getElementById('savedTemplates');
+                    savedTemplates.forEach(function(template) {
+                        var templateDiv = document.createElement('div');
+                        templateDiv.classList.add('template');
+                        var templateImg = document.createElement('img');
+                        templateImg.src = template.imageSrc;
+                        templateDiv.appendChild(templateImg);
+                        var templateOptions = document.createElement('div');
+                        templateOptions.classList.add('template-options');
+                        var editButton = document.createElement('button');
+                        editButton.innerText = 'Edit';
+                        editButton.onclick = function() {
+                            // Redirect to dashboard for editing template
+                            window.location.href = 'dashboard.html';
+                        };
+                        var deleteButton = document.createElement('button');
+                        deleteButton.innerText = 'Delete';
+                        deleteButton.onclick = function() {
+                            // Delete the template from local storage and reload the page
+                            var index = savedTemplates.indexOf(template);
+                            if (index !== -1) {
+                                savedTemplates.splice(index, 1);
+                                localStorage.setItem('savedTemplates', JSON.stringify(savedTemplates));
+                                loadSavedTemplates(); // Reload saved templates
+                            }
+                        };
+                        templateOptions.appendChild(editButton);
+                        templateOptions.appendChild(deleteButton);
+                        templateDiv.appendChild(templateOptions);
+                        savedTemplatesContainer.appendChild(templateDiv);
+                    });
+                }
+            }}
+
+            // Load saved templates on page load
+            loadSavedTemplates();
+            function logout() {
+            // Redirect the user to the logout page
+            window.location.href = "admin_login.html";
+        }
+
+    </script>
+</body>
+</html>

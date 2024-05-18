@@ -11,16 +11,45 @@ from PyPDF2 import PdfFileReader
 from django.http import HttpResponse
 import os
 import pymongo
-import logging
-
-# logger = logging.getLogger(__name__)
 
 def myapp(request):
     if os.path.exists('myapp/gazet/gazet.csv')==False:
         gazet_processing()
     else:
         pass
-    return render(request, 'myapp/myapp.html')
+    return render(request, 'myapp/comp/home.html')
+
+def home(request):
+    return render(request, 'myapp/comp/home.html')
+
+def about(request):
+    return render(request, 'myapp/comp/about.html')
+
+def login(request):
+    return render(request, 'myapp/comp/admin_login.html')
+
+def dashboard(request):
+    if request.method == 'POST':
+        name = request.POST.get('username')
+        password = request.POST.get('password')
+        if name=='123' and password=='123':
+            return render(request, 'myapp/comp/dashboard.html')
+        else:
+            return render(request, 'myapp/comp/admin_login.html')
+    else:
+        pass
+    return HttpResponse('Passed')
+
+def admin_dashboard(request):
+    return render(request, 'myapp/comp/dashboard.html')
+
+def saved_template(request):
+    return render(request, 'myapp/comp/saved_templates.html')
+
+def report(request):
+    return render(request, 'myapp/comp/reports.html')
+
+
 
 # a = 0
 
@@ -97,7 +126,6 @@ def verify(request):
     #     uploaded_file = request.FILES['file']
     # logger.info("Verify function called")
     global uploaded_file
-    print('Ali')
     uploaded_file = None
     if request.method == 'POST' and request.FILES['file']:
         uploaded_file = request.FILES['file']
@@ -142,9 +170,9 @@ def verify(request):
                             destination.write(chunk)
                     unvarified_db(name, roll, result)
                 # return HttpResponse('Data Uploaded')
-                return render(request, 'myapp/dashboard.html')
+                # return render(request, 'myapp/dashboard.html')
             else:
-                return HttpResponse('Roll no not found')
+                return render(request, 'myapp/comp/home.html',{'text' : 'Roll no not found'})
             # return render(request, 'myapp/dashboard.html')
     else:
         return HttpResponse('File not found')
