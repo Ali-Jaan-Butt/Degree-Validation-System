@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            position: relative;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            padding-top: 20px;
+            position: fixed;
+            height: 100%;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #555;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 250px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            margin-top: 20px;
+        }
+
+        .form-section input {
+            display: block;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .save-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .save-button:hover {
+            background-color: #0966ca;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+             <!--   <li><a href="saved_templates.html">Saved Templates</a></li>-->
+                <li><a href="{% url 'report' %}">Reports</a></li>
+                <li><a href="{% url 'settings' %}">Settings</a></li>
+                <li><a href="{% url 'login' %}">Logout</a></li>
+            </ul>
+        </div>
+        
+        <div class="content">
+            <h1>Settings</h1>
+            <form method="post" id="newUsername" action="{% url 'change_username' %}">
+                {% csrf_token %}
+                <div class="form-section">
+                    <h2>Change Username</h2>
+                    <input type="text" id="newUsername" placeholder="New Username" name="newUsername">
+                    <button class="save-button">Save Username</button>
+                </div>
+            </form>
+            <form method="post" id="changepassword" action="{% url 'change_password' %}">
+                {% csrf_token %}
+                <div class="form-section">
+                    <h2>Change Password</h2>
+                    <input type="password" id="currentPassword" placeholder="Current Password">
+                    <input type="password" id="newPassword" placeholder="New Password">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password">
+                    <button class="save-button" onclick="savePassword()">Save Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                window.location.href = "admin_login.html";
+            }
+        }
+
+        function saveUsername() {
+            const newUsername = document.getElementById('newUsername').value;
+
+            if (newUsername.trim() === '') {
+                alert("Username cannot be empty.");
+                return;
+            }
+
+            // Add logic to handle username change here
+            alert("Username changed successfully.");
+        }
+
+        function savePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                alert("New password and confirm password do not match.");
+                return;
+            }
+
+            if (!isValidPassword(newPassword)) {
+                alert("New password must be at least 8 characters long and include at least one letter and one number.");
+                return;
+            }
+
+            // Add logic to handle password change here
+            alert("Password changed successfully.");
+        }
+
+        function isValidPassword(password) {
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            return passwordRegex.test(password);
+        }
+    </script>
+</body>
+</html>

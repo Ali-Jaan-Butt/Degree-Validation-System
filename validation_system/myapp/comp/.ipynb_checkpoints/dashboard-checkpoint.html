@@ -172,8 +172,9 @@
     <div class="sidebar">
         <ul>
             <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'saved_template' %}">Saved Templates</a></li>
+          <!--  <li><a href="saved_templates.html">Saved Templates</a></li>-->
             <li><a href="{% url 'report' %}">Reports</a></li>
+            <li><a href="{% url 'settings' %}">Settings</a></li>
             <li><a href="{% url 'login' %}">Logout</a></li>
         </ul>
     </div>
@@ -189,15 +190,15 @@
         <div class="checkbox-container">
             <label class="checkbox-label">
                 <input type="checkbox" class="custom-checkbox">
-                Checkbox 1
+                Student Name
             </label>
             <label class="checkbox-label">
                 <input type="checkbox" class="custom-checkbox">
-                Checkbox 2
+                Roll number
             </label>
             <label class="checkbox-label">
                 <input type="checkbox" class="custom-checkbox">
-                Checkbox 3
+                Total marks
             </label>
         </div>
 
@@ -275,10 +276,10 @@
                 reader.readAsDataURL(file);
             }
         });
-        // function logout() {
-        //     // Redirect the user to the logout page
-        //     window.location.href = "admin_login.html";
-        // }
+        //function logout() {
+        //if (confirm("Are you sure you want to logout?")) {
+        //        window.location.href = "admin_login.html";
+        //    }}
     </script>
 </body>
 </html>

@@ -60,8 +60,9 @@
     <div class="sidebar">
         <ul>
             <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'saved_template' %}">Saved Templates</a></li>
-            <li><a href="{% url 'report' %}">Reports</a></li>
+       <!--     <li><a href="saved_templates.html">Saved Template</a></li>-->
+            <li><a href="{% url 'report' %}">Report</a></li>
+            <li><a href="{% url 'settings' %}">Settings</a></li>
             <li><a href="{% url 'login' %}">Logout</a></li>
         </ul>
     </div>
@@ -69,10 +70,10 @@
         <!-- report content here -->
     </div>
     <script>
-        function logout() {
-          // Redirect the user to the logout page
-         window.location.href = "admin_login.html";
-    }
+       //  function logout() {
+       //if (confirm("Are you sure you want to logout?")) {
+       //         window.location.href = "admin_login.html";
+       //     }}
     </script>
 </body>
 </html>

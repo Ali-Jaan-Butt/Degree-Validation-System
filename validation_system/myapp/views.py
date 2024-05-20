@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib import messages
 import tabula
 import re
 import pandas as pd
@@ -26,13 +27,36 @@ def about(request):
     return render(request, 'myapp/comp/about.html')
 
 def login(request):
+    obj = None
+    client = pymongo.MongoClient()
+    db = client.get_database('validate')
+    collection = db.get_collection('admin_login')
+    cursor = collection.find()
+    for document in cursor:
+        obj = document['_id']
+    if obj==None:
+        client = pymongo.MongoClient()
+        db = client.get_database('validate')
+        collection = db.get_collection('admin_login')
+        info = {'user':'123', 'passw':'123'}
+        collection.insert_one(info)
+    else:
+        pass
     return render(request, 'myapp/comp/admin_login.html')
 
 def dashboard(request):
     if request.method == 'POST':
         name = request.POST.get('username')
         password = request.POST.get('password')
-        if name=='123' and password=='123':
+        client = pymongo.MongoClient()
+        db = client.get_database('validate')
+        collection = db.get_collection('admin_login')
+        cursor = collection.find()
+        for document in cursor:
+            obj = document
+        db_name = obj['user']
+        db_pass = obj['passw']
+        if name==db_name and password==db_pass:
             return render(request, 'myapp/comp/dashboard.html')
         else:
             return render(request, 'myapp/comp/admin_login.html')
@@ -49,7 +73,55 @@ def saved_template(request):
 def report(request):
     return render(request, 'myapp/comp/reports.html')
 
+def settings(request):
+    return render(request, 'myapp/comp/settings.html')
 
+def change_username(request):
+    if request.method == 'POST':
+        ch_user = request.POST.get('newUsername')
+        print(ch_user)
+        print('Mango')
+        client = pymongo.MongoClient()
+        db = client.get_database('validate')
+        collection = db.get_collection('admin_login')
+        cursor = collection.find()
+        for document in cursor:
+            obj = document
+        ud_obj = { '$set': {'user':ch_user}}
+        collection.update_one(obj, ud_obj)
+    else:
+        pass
+
+def change_password(request):
+    if request.method == 'POST':
+        c_pass = request.POST.get('currentPassword')
+        print(c_pass)
+        print('Mango')
+        client = pymongo.MongoClient()
+        db = client.get_database('validate')
+        collection = db.get_collection('admin_login')
+        cursor = collection.find()
+        for document in cursor:
+            obj = document
+        if obj['passw']==c_pass:
+            c_pass = request.POST.get('newPassword')
+            ver_c_pass = request.POST.get('newPassword')
+            if c_pass==ver_c_pass:
+                client = pymongo.MongoClient()
+                db = client.get_database('validate')
+                collection = db.get_collection('admin_login')
+                cursor = collection.find()
+                for document in cursor:
+                    obj = document
+                ud_obj = { '$set': {'passw':ver_c_pass}}
+                collection.update_one(obj, ud_obj)
+            else:
+                pass
+        else:
+            pass
+    else:
+        pass
+    return render(request, 'myapp/comp/settings.html')
 
 # a = 0
 
@@ -127,6 +199,9 @@ def verify(request):
     # logger.info("Verify function called")
     global uploaded_file
     uploaded_file = None
+    condition = False
+    # if condition==False:
+    #     messages.info(request, 'Verification Status.')
     if request.method == 'POST' and request.FILES['file']:
         uploaded_file = request.FILES['file']
         if uploaded_file is not None:
@@ -171,18 +246,34 @@ def verify(request):
                     unvarified_db(name, roll, result)
                 # return HttpResponse('Data Uploaded')
                 # return render(request, 'myapp/dashboard.html')
+                condition = True
+                if condition==True:
+                    messages.info(request, 'Verified Succesfully.')
             else:
-                return render(request, 'myapp/comp/home.html',{'text' : 'Roll no not found'})
-            # return render(request, 'myapp/dashboard.html')
+                # return render(request, 'myapp/comp/home.html',{'text' : 'Roll no not found'})
+                messages.info(request, 'Verified Succesfully.')
+            return render(request, 'myapp/comp/home.html')
     else:
-        return HttpResponse('File not found')
+        messages.info(request, 'Upload PDF file to proceed.')
+    return render(request, 'myapp/comp/home.html')
     
-def your_view_name(request):
+def handle_checkbox_form(request):
     if request.method == 'POST':
-        checkbox_value = request.POST.get('my_checkbox')
-        if checkbox_value == '1':
-            print('Checked')
-        else:
-            print('Unchecked')
+        selected_options = []
+        if request.POST.get('cb1'):
+            selected_options.append(request.POST['cb1'])
+        if request.POST.get('cb2'):
+            selected_options.append(request.POST['cb2'])
+        if request.POST.get('cb3'):
+            selected_options.append(request.POST['cb3'])
+        if request.POST.get('cb4'):
+            selected_options.append(request.POST['cb4'])
+            
+        print(selected_options)
+        
+        # if selected_options:
+        #     messages.success(request, f'Selected options: {", ".join(selected_options)}')
+        # else:
+        #     messages.info(request, 'No options selected.')
 
-    # return render(request, 'myapp/dashboard.html')
+    return render(request, 'myapp/comp/dashboard.html')
