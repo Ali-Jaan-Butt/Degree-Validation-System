@@ -178,34 +178,34 @@
             <li><a href="{% url 'login' %}">Logout</a></li>
         </ul>
     </div>
+    <form action="{% url 'checkbox_data' %}" method="post">
+        {% csrf_token %}
+        <div class="content">
+            <h1>Admin Dashboard</h1>
+            <input type="file" id="imageInput" accept="image/*">
+            <div id="imageContainer" style="display: none;">
+                <img id="imageDisplay" src="#" alt="Uploaded Image">
+            </div>
     
-    <div class="content">
-        <h1>Admin Dashboard</h1>
-        <input type="file" id="imageInput" accept="image/*">
-        <div id="imageContainer" style="display: none;">
-            <img id="imageDisplay" src="#" alt="Uploaded Image">
+            <!-- Checkboxes -->
+            <div class="checkbox-container">
+                <label class="checkbox-label">
+                    <input type="checkbox" class="custom-checkbox" name="cb1">
+                    Student Name
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="custom-checkbox" name="cb2">
+                    Roll number
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="custom-checkbox" name="cb3">
+                    Total marks
+                </label>
+            </div>    
+            <!-- Save button -->
+            <button class="save-button">Save Template</button>
         </div>
-
-        <!-- Checkboxes -->
-        <div class="checkbox-container">
-            <label class="checkbox-label">
-                <input type="checkbox" class="custom-checkbox">
-                Student Name
-            </label>
-            <label class="checkbox-label">
-                <input type="checkbox" class="custom-checkbox">
-                Roll number
-            </label>
-            <label class="checkbox-label">
-                <input type="checkbox" class="custom-checkbox">
-                Total marks
-            </label>
-        </div>
-
-        <!-- Save button -->
-        <button class="save-button" onclick="saveTemplate()">Save Template</button>
-    </div>
-
+    </form>
     <!-- Saved content box -->
     <div id="savedContentBox">
         <h2>Saved Content</h2>

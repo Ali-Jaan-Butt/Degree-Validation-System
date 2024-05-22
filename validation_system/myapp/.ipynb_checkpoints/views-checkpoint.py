@@ -12,6 +12,7 @@ from PyPDF2 import PdfFileReader
 from django.http import HttpResponse
 import os
 import pymongo
+import pandas as pd
 
 def myapp(request):
     if os.path.exists('myapp/gazet/gazet.csv')==False:
@@ -57,8 +58,10 @@ def dashboard(request):
         db_name = obj['user']
         db_pass = obj['passw']
         if name==db_name and password==db_pass:
+            messages.info(request, None)
             return render(request, 'myapp/comp/dashboard.html')
         else:
+            messages.info(request, 'Invalid Login')
             return render(request, 'myapp/comp/admin_login.html')
     else:
         pass
@@ -74,13 +77,11 @@ def report(request):
     return render(request, 'myapp/comp/reports.html')
 
 def settings(request):
-    return render(request, 'myapp/comp/settings.html')
+    return render(request, 'myapp/comp/setting.html')
 
-def change_username(request):
+def update_username(request):
     if request.method == 'POST':
         ch_user = request.POST.get('newUsername')
-        print(ch_user)
-        print('Mango')
         client = pymongo.MongoClient()
         db = client.get_database('validate')
         collection = db.get_collection('admin_login')
@@ -91,12 +92,11 @@ def change_username(request):
         collection.update_one(obj, ud_obj)
     else:
         pass
+    return render(request, 'myapp/comp/setting.html')
 
 def change_password(request):
     if request.method == 'POST':
         c_pass = request.POST.get('currentPassword')
-        print(c_pass)
-        print('Mango')
         client = pymongo.MongoClient()
         db = client.get_database('validate')
         collection = db.get_collection('admin_login')
@@ -105,7 +105,7 @@ def change_password(request):
             obj = document
         if obj['passw']==c_pass:
             c_pass = request.POST.get('newPassword')
-            ver_c_pass = request.POST.get('newPassword')
+            ver_c_pass = request.POST.get('confirmPassword')
             if c_pass==ver_c_pass:
                 client = pymongo.MongoClient()
                 db = client.get_database('validate')
@@ -115,32 +115,14 @@ def change_password(request):
                     obj = document
                 ud_obj = { '$set': {'passw':ver_c_pass}}
                 collection.update_one(obj, ud_obj)
+                messages.info(request, None)
             else:
                 pass
         else:
-            pass
+            messages.info(request, 'Try again')
     else:
         pass
-    return render(request, 'myapp/comp/settings.html')
-
-# a = 0
-
-# def upload_file(request):
-#     # a+=1
-#     print('Ali')
-#     uploaded_file = None
-#     if request.method == 'POST' and request.FILES['file']:
-#         uploaded_file = request.FILES['file']
-#     if uploaded_file is not None:
-#             # my_file = uploaded_file.name
-#             # print(my_file)
-#             with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
-#                 for chunk in uploaded_file.chunks():
-#                     destination.write(chunk)
-#             # global uploaded_file
-#     else:
-#         pass
-#     return uploaded_file
+    return render(request, 'myapp/comp/setting.html')
             
 def gazet_processing():
     pdf_path = 'myapp/gazet/Gz_Ia1p21.pdf'
@@ -176,9 +158,6 @@ def gazet_processing():
     df.to_csv('myapp/gazet/gazet.csv', index=False)
     pass
 
-# def get_request(request):
-#     return render(request, 'myapp/dashboard.html')
-
 def varified_db(name, roll, result):
     client = pymongo.MongoClient()
     db = client.get_database('validate')
@@ -194,31 +173,16 @@ def unvarified_db(name, roll, result):
     collection.insert_one(unver_data)
 
 def verify(request):
-    # if request.method == 'POST' and request.FILES['file']:
-    #     uploaded_file = request.FILES['file']
-    # logger.info("Verify function called")
     global uploaded_file
     uploaded_file = None
     condition = False
-    # if condition==False:
-    #     messages.info(request, 'Verification Status.')
     if request.method == 'POST' and request.FILES['file']:
         uploaded_file = request.FILES['file']
         if uploaded_file is not None:
-            # my_file = uploaded_file.name
-            # print(my_file)
             with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
                 for chunk in uploaded_file.chunks():
                     destination.write(chunk)
-            # global uploaded_file
-        # else:
-        #     pass
-        # uploaded_file = None
-        # uploaded_file = upload_file(request)
-        # if uploaded_file is not None:
-            # uploaded_file = upload_file(request)
             print(uploaded_file)
-            # get_request(request)
             pdf_file = 'myapp/degrees/' + uploaded_file.name
             file_name = uploaded_file.name
             images = convert_from_path(pdf_file, dpi=300)
@@ -244,36 +208,45 @@ def verify(request):
                         for chunk in uploaded_file.chunks():
                             destination.write(chunk)
                     unvarified_db(name, roll, result)
-                # return HttpResponse('Data Uploaded')
-                # return render(request, 'myapp/dashboard.html')
                 condition = True
                 if condition==True:
                     messages.info(request, 'Verified Succesfully.')
             else:
-                # return render(request, 'myapp/comp/home.html',{'text' : 'Roll no not found'})
                 messages.info(request, 'Verified Succesfully.')
             return render(request, 'myapp/comp/home.html')
     else:
         messages.info(request, 'Upload PDF file to proceed.')
     return render(request, 'myapp/comp/home.html')
     
-def handle_checkbox_form(request):
+def checkbox_data(request):
+    cb_1 = None
+    cb_2 = None
+    cb_3 = None
+    col_data = []
     if request.method == 'POST':
-        selected_options = []
         if request.POST.get('cb1'):
-            selected_options.append(request.POST['cb1'])
+            cb_1 = request.POST.get('cb1')
+            col_data.append('name')
         if request.POST.get('cb2'):
-            selected_options.append(request.POST['cb2'])
+            cb_2 = request.POST.get('cb2')
+            col_data.append('roll')
         if request.POST.get('cb3'):
-            selected_options.append(request.POST['cb3'])
-        if request.POST.get('cb4'):
-            selected_options.append(request.POST['cb4'])
-            
-        print(selected_options)
-        
-        # if selected_options:
-        #     messages.success(request, f'Selected options: {", ".join(selected_options)}')
-        # else:
-        #     messages.info(request, 'No options selected.')
-
-    return render(request, 'myapp/comp/dashboard.html')
+            cb_3 = request.POST.get('cb3')
+            col_data.append('result')
+        client = pymongo.MongoClient()
+        db = client.get_database('validate')
+        collection = db.get_collection('validation_data')
+        cursor = collection.find()
+        final_data = {'_id':[], 'name':[], 'roll':[], 'result':[]}
+        for data in cursor:
+            final_data['_id'].append(data['_id'])
+            final_data['name'].append(data['name'])
+            final_data['roll'].append(data['roll'])
+            final_data['result'].append(data['result'])
+        df = pd.DataFrame(final_data, columns=col_data)
+        df_html = df.to_html(classes='dataframe', border=0, index=False)
+        print(final_data)
+        print(cb_1)
+        print(cb_2)
+        print(cb_3)
+    return render(request, 'myapp/comp/data.html', {'data':df_html})

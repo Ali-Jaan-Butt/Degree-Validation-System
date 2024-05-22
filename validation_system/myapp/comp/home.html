@@ -143,5 +143,14 @@
             </form>
         </div>
     </div>
+    {% if messages %}
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; width: 100%;">
+            {% for message in messages %}
+                <div style="padding: 15px; background-color: #f44336; color: white; border-radius: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 </body>
 </html>

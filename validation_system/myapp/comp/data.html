@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display DataFrame</title>
+    <style>
+        .dataframe {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dataframe th, .dataframe td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .dataframe th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>DataFrame</h1>
+    <div>
+        {{ data|safe }}
+    </div>
+</body>
+</html>
