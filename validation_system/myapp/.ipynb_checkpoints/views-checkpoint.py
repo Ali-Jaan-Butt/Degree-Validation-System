@@ -74,7 +74,16 @@ def saved_template(request):
     return render(request, 'myapp/comp/saved_templates.html')
 
 def report(request):
-    return render(request, 'myapp/comp/reports.html')
+    client = pymongo.MongoClient()
+    db = client.get_database('validate')
+    collection = db.get_collection('report')
+    cursor = collection.find()
+    for dt in cursor:
+        data_obj = dt
+    data_frame = pd.DataFrame(data_obj)
+    filtered_data = data_frame.drop(columns=['_id'])
+    df_html = filtered_data.to_html(classes='dataframe', border=0, index=False)
+    return render(request, 'myapp/comp/reports.html', {'data':df_html})
 
 def settings(request):
     return render(request, 'myapp/comp/setting.html')
@@ -174,56 +183,57 @@ def unvarified_db(name, roll, result):
 
 def verify(request):
     global uploaded_file
-    uploaded_file = None
-    condition = False
-    if request.method == 'POST' and request.FILES['file']:
-        uploaded_file = request.FILES['file']
-        if uploaded_file is not None:
-            with open('myapp/degrees/' + uploaded_file.name, 'wb+') as destination:
-                for chunk in uploaded_file.chunks():
-                    destination.write(chunk)
-            print(uploaded_file)
-            pdf_file = 'myapp/degrees/' + uploaded_file.name
-            file_name = uploaded_file.name
-            images = convert_from_path(pdf_file, dpi=300)
-            for i, image in enumerate(images):
-                image.save('myapp/image/' + file_name + '.jpg', 'JPEG')
-            image_file = 'myapp/image/' + file_name + '.jpg'
-            image = Image.open(image_file)
-            extracted_text = pytesseract.image_to_string(image)
-            name = re.search('Name: (.*?) F', extracted_text).group(1)
-            roll = re.search('Roll No.: (.*?) ', extracted_text).group(1)
-            result = re.search('Notification: (.*?)\n', extracted_text).group(1)
-            df = pd.read_csv('myapp/gazet/gazet.csv')
-            if any(df['Roll']==roll)==True:
-                comp = df[df['Roll']==roll]
-                ver = (comp['Result']==result).iloc[0]
-                if ver==True:
-                    with open('myapp/verified/' + uploaded_file.name, 'wb+') as destination:
-                        for chunk in uploaded_file.chunks():
-                            destination.write(chunk)
-                    varified_db(name, roll, result)
+    uploaded_file = []
+    messages.info(request, None)
+    if request.method == 'POST' and request.FILES.getlist('file'):
+        uploaded_file = request.FILES.getlist('file')
+        print(uploaded_file)
+        if uploaded_file is not []:
+            for f in uploaded_file:
+                with open('myapp/degrees/' + f.name, 'wb+') as destination:
+                    for chunk in f.chunks():
+                        destination.write(chunk)
+                print(f)
+                pdf_file = 'myapp/degrees/' + f.name
+                file_name = f.name
+                images = convert_from_path(pdf_file, dpi=300)
+                for i, image in enumerate(images):
+                    image.save('myapp/image/' + file_name + '.jpg', 'JPEG')
+                image_file = 'myapp/image/' + file_name + '.jpg'
+                image = Image.open(image_file)
+                extracted_text = pytesseract.image_to_string(image)
+                name = re.search('Name: (.*?) F', extracted_text).group(1)
+                roll = re.search('Roll No.: (.*?) ', extracted_text).group(1)
+                result = re.search('Notification: (.*?)\n', extracted_text).group(1)
+                df = pd.read_csv('myapp/gazet/gazet.csv')
+                if any(df['Roll']==roll)==True:
+                    comp = df[df['Roll']==roll]
+                    ver = (comp['Result']==result).iloc[0]
+                    if ver==True:
+                        with open('myapp/verified/' + f.name, 'wb+') as destination:
+                            for chunk in f.chunks():
+                                destination.write(chunk)
+                        varified_db(name, roll, result)
+                        messages.info(request, 'Verified Succesfully.')
+                    else:
+                        messages.info(request, 'Unverified')
+                        with open('myapp/unverified/' + f.name, 'wb+') as destination:
+                            for chunk in f.chunks():
+                                destination.write(chunk)
+                        unvarified_db(name, roll, result)
                 else:
-                    with open('myapp/unverified/' + uploaded_file.name, 'wb+') as destination:
-                        for chunk in uploaded_file.chunks():
-                            destination.write(chunk)
-                    unvarified_db(name, roll, result)
-                condition = True
-                if condition==True:
-                    messages.info(request, 'Verified Succesfully.')
-            else:
-                messages.info(request, 'Verified Succesfully.')
+                    pass
             return render(request, 'myapp/comp/home.html')
     else:
         messages.info(request, 'Upload PDF file to proceed.')
     return render(request, 'myapp/comp/home.html')
     
 def checkbox_data(request):
-    cb_1 = None
-    cb_2 = None
-    cb_3 = None
-    col_data = []
     if request.method == 'POST':
+        cb_1 = None
+        cb_2 = None
+        cb_3 = None
+        col_data = []
         if request.POST.get('cb1'):
             cb_1 = request.POST.get('cb1')
             col_data.append('name')
@@ -244,9 +254,9 @@ def checkbox_data(request):
             final_data['roll'].append(data['roll'])
             final_data['result'].append(data['result'])
         df = pd.DataFrame(final_data, columns=col_data)
-        df_html = df.to_html(classes='dataframe', border=0, index=False)
-        print(final_data)
-        print(cb_1)
-        print(cb_2)
-        print(cb_3)
-    return render(request, 'myapp/comp/data.html', {'data':df_html})
+        dict_list = df.to_dict(orient='list')
+        client = pymongo.MongoClient()
+        db = client.get_database('validate')
+        collection = db.get_collection('report')
+        collection.insert_one(dict_list)
+    return render(request, 'myapp/comp/dashboard.html')
