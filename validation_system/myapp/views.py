@@ -83,7 +83,14 @@ def report(request):
     data_frame = pd.DataFrame(data_obj)
     filtered_data = data_frame.drop(columns=['_id'])
     df_html = filtered_data.to_html(classes='dataframe', border=0, index=False)
-    return render(request, 'myapp/comp/reports.html', {'data':df_html})
+    collection1 = db.get_collection('report_uv')
+    cursor1 = collection1.find()
+    for dt in cursor1:
+        data_obj1 = dt
+    data_frame1 = pd.DataFrame(data_obj1)
+    filtered_data1 = data_frame1.drop(columns=['_id'])
+    df_html1 = filtered_data1.to_html(classes='dataframe', border=0, index=False)
+    return render(request, 'myapp/comp/reports.html', {'data':df_html, 'data1':df_html1})
 
 def settings(request):
     return render(request, 'myapp/comp/setting.html')
@@ -259,4 +266,18 @@ def checkbox_data(request):
         db = client.get_database('validate')
         collection = db.get_collection('report')
         collection.insert_one(dict_list)
+        collection1 = db.get_collection('unvalidated_data')
+        cursor1 = collection1.find()
+        final_data1 = {'_id':[], 'name':[], 'roll':[], 'result':[]}
+        for data in cursor1:
+            final_data1['_id'].append(data['_id'])
+            final_data1['name'].append(data['name'])
+            final_data1['roll'].append(data['roll'])
+            final_data1['result'].append(data['result'])
+        df = pd.DataFrame(final_data1, columns=col_data)
+        dict_list1 = df.to_dict(orient='list')
+        client1 = pymongo.MongoClient()
+        db1 = client1.get_database('validate')
+        collection1 = db1.get_collection('report_uv')
+        collection1.insert_one(dict_list1)
     return render(request, 'myapp/comp/dashboard.html')
